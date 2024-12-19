@@ -6,6 +6,8 @@ from classi import Ship, Asteroids
 from PIL import Image, ImageTk
 from game_start import create_start_screen
 import time
+from game_over_screen import create_game_over_screen
+
 class Game:
     def __init__(self, root):
         self.root = root
@@ -50,7 +52,7 @@ class Game:
         x2 = x1 - 70
         y2 = y1 - 60
         self.ship = Ship(x1, y1, x2, y2, canvas, root)
-        self.asteroids = Asteroids(10, canvas, root)
+        self.asteroids = Asteroids(4, canvas, root)
         self.lives_counter = canvas.create_text(60, 30, text=f"lives: {self.lives}", fill="green", font=("Arial", 16))
         self.score_counter = canvas.create_text(width - 120, 30, text=f"score: {self.score}", fill="green", font=("Arial", 16))
 
@@ -65,16 +67,49 @@ class Game:
 
     def game(self, root):
         self.li_sc_update(self.canvas, self.width)
-        self.spawn_asteroid(root)
-        root.after(500, lambda: self.game(root))
+        self.asteroids.create_asteroid()
+        self.collision_check()
+        self.game_over_check()
+        root.after(50, lambda: self.game(root))
 
-    def spawn_asteroid(self, root, n=4):
+
+    def collision_check(self, n=4):
         for i in range(n):
-                if self.i == n-1:
-                    self.i = 0
-                else:
-                    self.i += 1
-                self.asteroids.create_asteroid(self.i)
+            self.lives = self.asteroids.collision(i, self.ship, self.lives)
+            for j in range(30):
+                self.asteroids.collision(i, self.ship.bullets[j])
+        self.asteroids.kill_asteroid()
+
+
+
+    def game_over_check(self):
+        if self.lives <= 0:
+            self.show_game_over_screen()
+
+    def show_game_over_screen(self):
+
+        self.background_image = create_game_over_screen()
+        self.background_image_tk = ImageTk.PhotoImage(self.background_image)
+
+        background_label = tk.Label(self.root, image=self.background_image_tk)
+        background_label.place(relwidth=1, relheight=1)
+
+        start_font = ("Arial", 50)
+        start_text = tk.Label(self.root, text="game over", font=start_font, fg="white")
+        start_text.place(relx=0.5, rely=0.5, anchor="center")
+
+        def toggle_text_visibility():
+            current_color = start_text.cget("fg")
+
+            if current_color == "white":
+                start_text.config(fg="#999999", bg="#0A0A32")
+            else:
+                start_text.config(fg="white", bg="#0A0A32")
+
+            self.root.after(500, toggle_text_visibility)
+
+        toggle_text_visibility()
+        self.root.mainloop()
 
 root = tk.Tk()
 game = Game(root)
