@@ -1,6 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import random
+from final import start_game
 
 
 def create_start_screen():
@@ -10,7 +11,6 @@ def create_start_screen():
     ship_image = Image.open("ship.png")
     asteroid_image = Image.open("asteroid.png")
 
-    # кораблик
     ship_image = ship_image.resize((400, 400))
     ship_image = ship_image.rotate(-25, expand=True)
     ship_x = -200
@@ -41,7 +41,7 @@ def create_start_screen():
     return background
 
 
-def show_start_screen(start_game_callback):
+def show_start_screen():
     start_window = tk.Tk()
     start_window.title("Asteroidiki")
     start_window.geometry("800x600")
@@ -56,6 +56,9 @@ def show_start_screen(start_game_callback):
     start_text = tk.Label(start_window, text="click to start", font=start_font, fg="white", bg="#0A0A32")
     start_text.place(relx=0.5, rely=0.5, anchor="center")
 
-    start_window.after(100, lambda: start_text.bind("<Button-1>", lambda e: start_game_callback(start_window)))
+    start_window.after(100, lambda: start_text.bind("<Button-1>", lambda e: start_game(start_window)))
 
     start_window.mainloop()
+
+show_start_screen()
+

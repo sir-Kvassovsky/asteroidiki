@@ -3,13 +3,15 @@ import random
 import math
 from math import cos, sin
 from classi import Ship, Asteroid
-from start_screen import show_start_screen
+# from start_screen import show_start_screen
 from PIL import Image, ImageTk
 
-def start_game(start_window):
-    start_window.destroy()
-    root = tk.Tk()
-    root.title("Asteroidiki")
+def start_game(root):
+    # start_window.destroy()
+    # root = tk.Tk()
+    # root.title("Asteroidiki")
+    for l in root.winfo_children():
+        l.destroy()
     width = 800
     height = 600
     canvas = tk.Canvas(root, width=width, height=height, bg="white")
@@ -39,6 +41,5 @@ def start_game(start_window):
     root.mainloop()
 
 
-show_start_screen(start_game)
 
 
