@@ -92,6 +92,7 @@ class Ship(StarObj):
 class Asteroid(StarObj):
     def __init__(self, canvas, root, x1=0, y1=0, x2=0, y2=0,  a=0, speed=0, width=800, height=600):
         super().__init__(x1, y1, x2, y2, canvas, root, speed, a)
+        self.alive = True
         self.create(width, height)
         self.astr_image = ImageTk.PhotoImage(self.image)
         self.typeo = self.canvas.create_image(self.x1, self.y1, image=self.astr_image)
@@ -123,5 +124,13 @@ class Asteroids:
     def create_asteroid(self, i):
         if self.asteroids[i] == 0:
                 self.asteroids[i] = Asteroid(self.canvas, self.root)
+
+class Bullet(StarObj):
+    def __init__(self, canvas, root, x1, y1, a, speed, x2=0, y2=0):
+        super().__init__(x1, y1, x2, y2, canvas, root, speed, a)
+        self.alive = True
+
+
+        
 
     

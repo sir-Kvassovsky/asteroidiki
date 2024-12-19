@@ -5,13 +5,17 @@ from math import cos, sin
 from classi import Ship, Asteroids
 from PIL import Image, ImageTk
 from game_start import create_start_screen
-
+import time
 class Game:
     def __init__(self, root):
         self.root = root
         root.title("Asteroidiki")
         root.geometry("800x600")
         self.asteroids = None
+        self.lives = 3
+        self.score = 0
+        self.i = 0
+
         self.background_image = create_start_screen()
         self.background_image_tk = ImageTk.PhotoImage(self.background_image)
         background_label = tk.Label(root, image=self.background_image_tk)
@@ -32,6 +36,7 @@ class Game:
     def game_start_now(self, root):
         self.root = root
         width = 800
+        self.width = width
         height = 600
         canvas = tk.Canvas(root, width=width, height=height, bg="#0A0A32")
         self.canvas = canvas
@@ -46,24 +51,30 @@ class Game:
         y2 = y1 - 60
         self.ship = Ship(x1, y1, x2, y2, canvas, root)
         self.asteroids = Asteroids(10, canvas, root)
-        self.lives = 3
-        self.score = 0
-        i = 0
-        self.li_sc_update(canvas, width)
-        self.li_sc_update(canvas, width)
-        # self.game(root, canvas, i)
-
-
-    def li_sc_update(self, canvas, width):
         self.lives_counter = canvas.create_text(60, 30, text=f"lives: {self.lives}", fill="green", font=("Arial", 16))
         self.score_counter = canvas.create_text(width - 120, 30, text=f"score: {self.score}", fill="green", font=("Arial", 16))
 
-    def game(self, root, n):
-        if self.i == 9:
-            self.i = 0
-        else:
-            self.i += 1
-        self.asteroids.create_asteroid(i)
+        self.game(root)
+
+
+    def li_sc_update(self, canvas, width):
+        canvas.delete(self.lives_counter)
+        canvas.delete(self.score_counter)
+        self.lives_counter = canvas.create_text(60, 30, text=f"lives: {self.lives}", fill="green", font=("Arial", 16))
+        self.score_counter = canvas.create_text(width - 120, 30, text=f"score: {self.score}", fill="green", font=("Arial", 16))
+
+    def game(self, root):
+        self.li_sc_update(self.canvas, self.width)
+        self.spawn_asteroid(root)
+        root.after(500, lambda: self.game(root))
+
+    def spawn_asteroid(self, root, n=4):
+        for i in range(n):
+                if self.i == n-1:
+                    self.i = 0
+                else:
+                    self.i += 1
+                self.asteroids.create_asteroid(self.i)
 
 root = tk.Tk()
 game = Game(root)
