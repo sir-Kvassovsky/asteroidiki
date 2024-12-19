@@ -2,18 +2,23 @@ import tkinter as tk
 import random
 import math
 from math import cos, sin
+from PIL import Image, ImageTk
 
 class StarObj:
     def __init__(self, typeo, x1, y1, x2, y2, canvas, root, speed, a):
         self.typeo = typeo
-        self.update_coords((x1, y1, x2, y2))
+        self.update_coords((x1, y1))
+        self.update_coords1()
         self.speed = speed
         self.a = a
         self.canvas = canvas
         self.root = root
     
     def update_coords(self, cords):
-        self.x1, self.y1, self.x2, self.y2 = cords
+        self.x1, self.y1 = cords
+    
+    def update_coords1(self):
+        self.x2, self.y2 = self.x1, self.y1
 
     def move(self):
         self.update_coords(self.canvas.coords(self.typeo))
@@ -34,6 +39,7 @@ class StarObj:
 class Ship(StarObj):
     def __init__(self, typeo, x1, y1, x2, y2, canvas, root, speed=1, a=math.pi * 3/2,moving=False):
         super().__init__(typeo, x1, y1, x2, y2, canvas, root, speed, a)
+        self.image = Image.open("ship.png").resize((70, 60))
         self.moving = moving
         self.root.bind("<KeyPress-Up>", self.start_move) 
         self.root.bind("<KeyRelease-Up>", self.stop_move) 
@@ -41,9 +47,13 @@ class Ship(StarObj):
         self.root.bind("<Right>", self.rotation_right)
         self.move()
 
+    def update_coords1(self):
+        self.x2 = self.x1 + 70
+        self.y2 = self.y1 + 60
 
     def move(self):
         self.update_coords(self.canvas.coords(self.typeo))
+        self.update_coords1()
         self.speed_change()
         self.canvas.move(self.typeo, self.speed*cos(self.a), self.speed*sin(self.a))
         self.endless_window()
@@ -51,7 +61,7 @@ class Ship(StarObj):
 
     def speed_change(self):
         if self.moving:
-            self.speed = min(self.speed + 0.03, 7)
+            self.speed = min(self.speed + 0.03, 6)
         else:
             self.speed = max(self.speed - 0.1, 0) 
 
@@ -66,12 +76,10 @@ class Ship(StarObj):
             i = -1
         elif direction == "Right":
             i = 1
-        self.update_coords(self.canvas.coords(self.typeo))
-        self.a+= 0.1 * i
-        self.x1 = cos(self.a) * 40 + self.x2
-        self.y1 = sin(self.a) * 40 + self.y2
-        self.canvas.coords(self.typeo, self.x1, self.y1, self.x2, self.y2)
-
+        self.a += 0.15 * i 
+        self.ship_image = ImageTk.PhotoImage(self.image.rotate(-57*self.a - 90, expand=True))
+        self.canvas.itemconfig(self.typeo, image=self.ship_image) 
+        
     def rotation_left(self, event):
         self.rotation("Left")
 

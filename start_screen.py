@@ -28,13 +28,11 @@ def create_start_screen():
         {"position": (375, 480), "size": (80, 80)}
     ]
 
-    # астероиды
     for asteroid in asteroid_data:
         asteroid_image_resized = asteroid_image.resize(asteroid["size"])
         background.paste(asteroid_image_resized, asteroid["position"],
                          asteroid_image_resized)
 
-    # звездочки
     for _ in range(100):
         star_x = random.randint(0, width - 1)
         star_y = random.randint(0, height - 1)
