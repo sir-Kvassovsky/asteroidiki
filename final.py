@@ -30,9 +30,9 @@ class Game:
         lives = 3
         score = 0
         lives_text = tk.Label(root, text=f"lives: {lives}", fg="green", font=("Arial", 16), bg="#0A0A32")
-        score_text = tk.Label(root, text=f"score: {score}", fg="green", font=("Arial", 16), bg="#0A0A32")
+        self.score_text = tk.Label(root, text=f"score: {score}", fg="green", font=("Arial", 16), bg="#0A0A32")
         lives_text.place(relx=60/800, rely=30/600, anchor="center")
-        score_text.place(relx=680/800, rely=30/600, anchor="center")
+        self.score_text.place(relx=680/800, rely=30/600, anchor="center")
         root.after(100, lambda: start_text.bind("<Button-1>", lambda e: self.game_start_now(root)))
 
     def game_start_now(self, root):
@@ -40,6 +40,7 @@ class Game:
         width = 800
         self.width = width
         height = 600
+        self.height = height
         canvas = tk.Canvas(root, width=width, height=height, bg="#0A0A32")
         self.canvas = canvas
         canvas.pack()
@@ -51,6 +52,9 @@ class Game:
         y1 = height // 2
         x2 = x1 - 70
         y2 = y1 - 60
+        self.blow_up = Image.open('explosion.png').resize((100, 100))
+        self.blow_up_image = ImageTk.PhotoImage(self.blow_up)
+        self.live_pred = 3
         self.ship = Ship(x1, y1, x2, y2, canvas, root)
         self.asteroids = Asteroids(4, canvas, root)
         self.lives_counter = canvas.create_text(60, 30, text=f"lives: {self.lives}", fill="green", font=("Arial", 16))
@@ -70,15 +74,30 @@ class Game:
         self.asteroids.create_asteroid()
         self.collision_check()
         self.game_over_check()
+        try:
+            self.ship_death_time -= 1
+            if self.ship_death_time == 0:
+                self.canvas.delete(self.ship_death)
+            for i in range(4):
+                self.asteroids.asteroids_deaths_times[i] -= 1
+                if self.asteroids.asteroids_deaths_times[i] == 0:
+                    self.canvas.delete(self.asteroids.asteroids_deaths[i])
+        except AttributeError: pass
         root.after(50, lambda: self.game(root))
 
 
     def collision_check(self, n=4):
         for i in range(n):
             self.lives = self.asteroids.collision(i, self.ship, self.lives)
+            if self.live_pred > self.lives:
+                self.ship_death = self.canvas.create_image(self.ship.x1-70, self.ship.x2-60, image=self.blow_up_image)
+                self.ship_death_time = 12
+                self.canvas.coords(self.ship.typeo, self.width//2, self.height//2)
+                self.ship.speed = 0
+                self.live_pred -= 1
             for j in range(30):
                 self.asteroids.collision(i, self.ship.bullets[j])
-        self.asteroids.kill_asteroid()
+        self.score += self.asteroids.kill_asteroid()
 
 
 
@@ -97,6 +116,8 @@ class Game:
         start_font = ("Arial", 50)
         start_text = tk.Label(self.root, text="game over", font=start_font, fg="white")
         start_text.place(relx=0.5, rely=0.5, anchor="center")
+        self.score_text = tk.Label(root, text=f"score: {self.score}", fg="green", font=("Arial", 16), bg="#0A0A32")
+        self.score_text.place(relx=400/800, rely=200/600, anchor="center")
 
         def toggle_text_visibility():
             current_color = start_text.cget("fg")

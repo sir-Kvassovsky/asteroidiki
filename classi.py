@@ -53,9 +53,9 @@ class Ship(StarObj):
         self.moving = moving
         self.root.bind("<KeyPress-Up>", self.start_move) 
         self.root.bind("<KeyRelease-Up>", self.stop_move) 
-        self.root.bind("<Left>", self.rotation_left)
-        self.root.bind("<Right>", self.rotation_right)
-        self.root.bind("<space>", self.spawn_bullet)
+        self.root.bind("<Left>", lambda event: self.rotation_left())
+        self.root.bind("<Right>",lambda event: self.rotation_right())
+        self.root.bind("<KeyPress-space>",lambda event: self.spawn_bullet())
         self.move()
         self.i = 0
 
@@ -103,10 +103,10 @@ class Ship(StarObj):
             self.canvas.itemconfig(self.typet, image=self.engine_image) 
         except AttributeError: pass
         
-    def rotation_left(self, event):
+    def rotation_left(self):
         self.rotation("Left")
 
-    def rotation_right(self, event):
+    def rotation_right(self):
         self.rotation("Right")
 
     def move_fire(self):
@@ -119,7 +119,7 @@ class Ship(StarObj):
         except AttributeError:
             pass
 
-    def spawn_bullet(self, event):
+    def spawn_bullet(self):
         self.i += 1
         if self.i == 29:
             self.i = 0
@@ -166,6 +166,8 @@ class Asteroid(StarObj):
         self.y1 = y_0 * r2
         self.x2 = self.x1
         self.y2 = self.y1
+        self.blow_up = Image.open('explosion.png').resize((int(r), int(r)))
+        self.blow_up_image = ImageTk.PhotoImage(self.blow_up)
         self.image = Image.open("asteroid.png").resize((int(r), int(r)))
 
     def destroy(self, space_obj, lives):
@@ -189,6 +191,8 @@ class Asteroids:
         self.canvas = canvas
         self.root = root
         self.asteroids = [0]*n
+        self.asteroids_deaths = [0]*n
+        self.asteroids_deaths_times = [0]*n
     
     def create_asteroid(self):
         for i in range(self.n):
@@ -199,12 +203,17 @@ class Asteroids:
         return self.asteroids[i].destroy(space_obj, lives)
 
     def kill_asteroid(self):
+        killed = 0
         for i in range(self.n):
-            try:
+            # try:
                 if not self.asteroids[i].alive:
+                    # self.asteroids_deaths[i] = self.canvas.create_image(self.asteroids[i].x1, self.asteroids[i].x2-300, image=self.asteroids[i].blow_up_image)
+                    # self.asteroids_deaths_times[i] = 12 
                     self.canvas.delete(self.asteroids[i].typeo)
                     self.asteroids[i] = 0
-            except AttributeError: pass
+                    killed += 1
+            # except AttributeError: pass
+        return killed
 
 
 
