@@ -41,7 +41,9 @@ class Ship(StarObj):
     def __init__(self, x1, y1, x2, y2, canvas, root, speed=1, a=math.pi * 3/2,moving=False):
         super().__init__(x1, y1, x2, y2, canvas, root, speed, a)
         self.image = Image.open("ship.png").resize((70, 60))
+        self.image2 = Image.open('enginefire.png').resize((30,30)).rotate(180)
         self.ship_image = ImageTk.PhotoImage(self.image)
+        self.engine_image = ImageTk.PhotoImage(self.image2)
         self.typeo = self.canvas.create_image(self.x1, self.y1, image=self.ship_image)
         self.moving = moving
         self.root.bind("<KeyPress-Up>", self.start_move) 
@@ -59,20 +61,24 @@ class Ship(StarObj):
         self.update_coords1()
         self.speed_change()
         self.canvas.move(self.typeo, self.speed*cos(self.a), self.speed*sin(self.a))
+        self.move_fire()
         self.endless_window()
         self.root.after(10, self.move)
 
     def speed_change(self):
         if self.moving:
-            self.speed = min(self.speed + 0.03, 6)
+            self.speed = min(self.speed + 0.02, 5)
         else:
-            self.speed = max(self.speed - 0.1, 0) 
+            self.speed = max(self.speed - 0.03, 0) 
 
     def start_move(self, event):
         self.moving = True
-
+        self.typet = self.canvas.create_image(self.x1, self.y1+45, image=self.engine_image)
+        self.move_fire()
+        
     def stop_move(self, event):
         self.moving = False
+        self.canvas.delete(self.typet)
 
     def rotation(self, direction):
         if direction == "Left":
@@ -80,15 +86,29 @@ class Ship(StarObj):
         elif direction == "Right":
             i = 1
         self.a += 0.15 * i 
+        self.move_fire()
         self.ship_image = ImageTk.PhotoImage(self.image.rotate(-57*self.a - 90, expand=True))
+        self.engine_image = ImageTk.PhotoImage(self.image2.rotate(-57*self.a - 90, expand=True))
         self.canvas.itemconfig(self.typeo, image=self.ship_image) 
+        self.canvas.itemconfig(self.typet, image=self.engine_image) 
+
         
     def rotation_left(self, event):
         self.rotation("Left")
 
     def rotation_right(self, event):
         self.rotation("Right")
-    
+
+    def move_fire(self):
+        try:
+            self.update_coords(self.canvas.coords(self.typeo))
+            self.update_coords1()
+            x = cos(self.a - math.pi)*45 + self.x1
+            y = sin(self.a - math.pi)*45 + self.y1
+            self.canvas.coords(self.typet, x, y)
+        except AttributeError:
+            pass
+
 class Asteroid(StarObj):
     def __init__(self, canvas, root, x1=0, y1=0, x2=0, y2=0,  a=0, speed=0, width=800, height=600):
         super().__init__(x1, y1, x2, y2, canvas, root, speed, a)
@@ -129,6 +149,7 @@ class Bullet(StarObj):
     def __init__(self, canvas, root, x1, y1, a, speed, x2=0, y2=0):
         super().__init__(x1, y1, x2, y2, canvas, root, speed, a)
         self.alive = True
+        
 
 
         
