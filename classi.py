@@ -5,8 +5,8 @@ from math import cos, sin
 from PIL import Image, ImageTk
 
 class StarObj:
-    def __init__(self, typeo, x1, y1, x2, y2, canvas, root, speed, a):
-        self.typeo = typeo
+    def __init__(self, x1, y1, x2, y2, canvas, root, speed, a):
+        self.typeo = None
         self.update_coords((x1, y1))
         self.update_coords1()
         self.speed = speed
@@ -22,8 +22,9 @@ class StarObj:
 
     def move(self):
         self.update_coords(self.canvas.coords(self.typeo))
+        self.update_coords1()
         self.canvas.move(self.typeo, self.speed*cos(self.a), self.speed*sin(self.a))
-        self.endless_window(self.x1, self.y1, self.x2, self.y2, self.typeo)
+        self.endless_window()
         self.root.after(10, self.move)
 
     def endless_window(self):
@@ -37,9 +38,11 @@ class StarObj:
             self.canvas.move(self.typeo, 0, -(self.y2 - self.y1 + 600))
         
 class Ship(StarObj):
-    def __init__(self, typeo, x1, y1, x2, y2, canvas, root, speed=1, a=math.pi * 3/2,moving=False):
-        super().__init__(typeo, x1, y1, x2, y2, canvas, root, speed, a)
+    def __init__(self, x1, y1, x2, y2, canvas, root, speed=1, a=math.pi * 3/2,moving=False):
+        super().__init__(x1, y1, x2, y2, canvas, root, speed, a)
         self.image = Image.open("ship.png").resize((70, 60))
+        self.ship_image = ImageTk.PhotoImage(self.image)
+        self.typeo = self.canvas.create_image(self.x1, self.y1, image=self.ship_image)
         self.moving = moving
         self.root.bind("<KeyPress-Up>", self.start_move) 
         self.root.bind("<KeyRelease-Up>", self.stop_move) 
@@ -87,22 +90,38 @@ class Ship(StarObj):
         self.rotation("Right")
     
 class Asteroid(StarObj):
-    def __init__(self, typeo, canvas, root, x1=0, y1=0, x2=0, y2=0,  a=0, speed=0, width=800, height=600):
-        super().__init__(typeo, x1, y1, x2, y2, canvas, root, speed, a)
+    def __init__(self, canvas, root, x1=0, y1=0, x2=0, y2=0,  a=0, speed=0, width=800, height=600):
+        super().__init__(x1, y1, x2, y2, canvas, root, speed, a)
         self.create(width, height)
-        self.canvas.create_oval(self.x1, self.y1, self.x2, self.y2)
+        self.astr_image = ImageTk.PhotoImage(self.image)
+        self.typeo = self.canvas.create_image(self.x1, self.y1, image=self.astr_image)
+        self.move()
 
     def create(self, width, height):
-        x_0 = random.uniform(0,  width/2.1)
-        y_0 = random.uniform(0,  height/2.1)
-        x_1 = random.uniform(width/1.9,  width)
-        y_1 = random.uniform(height/1.9,  height)
-        r1, r2 = random.randint(0, 1), random.randint(0, 1)
+        x_0 = random.uniform(0,  width)
+        y_0 = random.uniform(0,  height)
+        r1 = random.randint(0, 1)
+        r2 = 1 - r1
         self.speed = random.uniform(0.1, 3)
         self.a = random.uniform(0, 2*math.pi)
-        r = random.randint(25, 50)
-        self.x1 = x_0 - r
+        r = random.randint(50, 200)
+        self.x1 = x_0 * r1 
+        self.y1 = y_0 * r2
         self.x2 = x_0 + r
-        self.y1 = y_0 - r
         self.y2 = y_0 + r
+        self.image = Image.open("asteroid.png").resize((int(r), int(r)))
+    
+class Asteroids:
+    def __init__(self, n, canvas, root):
+        self.n = n
+        self.canvas = canvas
+        self.root = root
+        self.asteroids = [0]*n
+        self.i = 0
+        self.create_asteroid(self.i)
+    
+    def create_asteroid(self, i):
+        if self.asteroids[i] == 0:
+                self.asteroids[i] = Asteroid(self.canvas, self.root)
+
     
